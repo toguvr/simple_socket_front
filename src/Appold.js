@@ -7,6 +7,7 @@ function App() {
   const user_id = localStorage.getItem('user_id');
   const port = localStorage.getItem('port');
   const [message, setMessage] = useState('');
+  const [sendMsg, setsendMsg] = useState('');
   const url = 'https://api-dev.hubees.com.br';
   // const url = `http://localhost:${port}`;
   // const url = `http://localhost:3333?user_id=${user_id}`;
@@ -22,24 +23,42 @@ function App() {
     });
   }, []);
   useEffect(() => {
-    socket.on('CLIENT_PIX_PAID', (data) => {
+    socket.on('private_message', (data) => {
       console.log('recebido', data);
-      setMessage(JSON.stringify(data));
+      setMessage(data.msg);
     });
 
     socket.on('error', (err) => console.log('error', err));
     socket.on('connect', () => console.log('connect'));
   }, [socket]);
+  const sendMsgClicked = () => {
+    console.log({
+      anotherUserId: user_id == '1' ? '2' : '1',
+      msg: sendMsg,
+    });
 
+    socket.emit('private_message', {
+      anotherUserId: user_id == '1' ? '2' : '1',
+      msg: sendMsg,
+    });
+  };
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
 
+        <label htmlFor="">MENSAGEM PARA O OUTRO</label>
+
+        <input
+          type="text"
+          onChange={(e) => setsendMsg(e.target.value)}
+          value={sendMsg}
+        />
+        <button onClick={sendMsgClicked}>send</button>
         <p>
           User: {user_id} | port: {port}
         </p>
-        <p>msg recebida: {message}</p>
+        <p>novo: {message}</p>
       </header>
     </div>
   );
